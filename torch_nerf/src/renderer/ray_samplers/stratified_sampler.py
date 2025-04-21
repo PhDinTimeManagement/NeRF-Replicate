@@ -71,6 +71,10 @@ class StratifiedSampler(RaySamplerBase):
         fars = ray_bundle.fars
         num_ray = nears.shape[0]
 
+        # Extract scalar near/far for mapping
+        near = nears[0, 0].item()
+        far = fars[0, 0].item()
+
         # Step 1: Create t bins in [0, 1], shape: [num_sample]
         t_bins = self.create_t_bins(num_sample + 1, device=nears.device) # +1 for bin edges
 
@@ -83,7 +87,7 @@ class StratifiedSampler(RaySamplerBase):
         t_values = t_lower[None, :] + (t_upper - t_lower)[None, :] * t_rand # [num_ray, num_sample]
 
         # Step 4: Map t values to Euclidean space
-        t_samples = self.map_t_to_euclidean(t_values, nears, fars)  # [num_ray, num_sample]
+        t_samples = self.map_t_to_euclidean(t_values, near, far)  # [num_ray, num_sample]
 
         return t_samples
 
