@@ -13,5 +13,3 @@ log:
   epoch_btw_vis: 10
 ckpt:
   path: null
-
-num_rays: 256

@@ -131,7 +131,7 @@ def train_one_epoch(
         pixel_indices = torch.tensor(
             np.random.choice(
                 camera.image_height.item() * camera.image_width.item(),
-                size=[cfg.renderer.num_pixels],
+                size=[cfg.renderer.num_pixels], # num_pixels is the BATCH_SIZE
                 replace=False,
             ),
             device=camera.device,
