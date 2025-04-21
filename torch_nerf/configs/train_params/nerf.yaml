@@ -14,4 +14,4 @@ log:
 ckpt:
   path: null
 
-num_rays: 512
+num_rays: 256
