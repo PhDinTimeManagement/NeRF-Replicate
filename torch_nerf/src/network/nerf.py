@@ -43,17 +43,17 @@ class NeRF(nn.Module):
         # First 4 layers (before skip connection)
         self.fc_pos = nn.ModuleList([
             nn.Linear(pos_dim, feat_dim),
-            nn.ReLU(feat_dim, feat_dim),
             nn.Linear(feat_dim, feat_dim),
-            nn.ReLU(feat_dim, feat_dim),
+            nn.Linear(feat_dim, feat_dim),
+            nn.Linear(feat_dim, feat_dim),
         ])
 
         # Layers after concatentation γ(x) again (skip connection)
         self.fc_pos_skip = nn.ModuleList([
             nn.Linear(feat_dim + pos_dim, feat_dim),
-            nn.ReLU(feat_dim, feat_dim),
             nn.Linear(feat_dim, feat_dim),
-            nn.ReLU(feat_dim, feat_dim),
+            nn.Linear(feat_dim, feat_dim),
+            nn.Linear(feat_dim, feat_dim),
         ])
 
         # Sigma head (predict density)
@@ -63,10 +63,10 @@ class NeRF(nn.Module):
         self.fc_feat = nn.Linear(feat_dim, feat_dim)
 
         # View direction layer after concatentation γ(d) (skip connection)
-        self.fc_view = nn.ModuleList([feat_dim + view_dir_dim, 128])
+        self.fc_view = nn.Linear([feat_dim + view_dir_dim, 128])
 
         # RGB head (predict color)
-        self.fc_rgb = nn.linear(128, 3)
+        self.fc_rgb = nn.Linear(128, 3)
 
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
