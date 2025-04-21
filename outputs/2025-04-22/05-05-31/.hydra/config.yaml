@@ -1,0 +1,51 @@
+cuda:
+  device_id: 0
+data:
+  dataset_type: nerf_synthetic
+  data_root: data/nerf_synthetic
+  scene_name: lego
+  data_type: train
+  batch_size: 1
+  shuffle: true
+  half_res: false
+  white_bg: true
+network:
+  type: nerf
+  pos_dim: 3
+  view_dir_dim: 3
+objective:
+  loss_type: nerf_default
+train_params:
+  optim:
+    num_iter: 50000
+    optim_type: adam
+    scheduler_type: exp
+    init_lr: 0.0005
+    end_lr: 5.0e-05
+    eps: 1.0e-08
+  validation:
+    validate_every: 10
+    num_batch: 5
+  log:
+    epoch_btw_ckpt: 10
+    epoch_btw_vis: 10
+  ckpt:
+    path: null
+scene:
+  type: cube
+renderer:
+  integrator_type: quadrature
+  sampler_type: stratified
+  num_pixels: 2048
+  num_samples_coarse: 64
+  num_samples_fine: 128
+  t_near: 2.0
+  t_far: 6.0
+  project_to_ndc: false
+signal_encoder:
+  type: pe
+  coord_encode_level: 10
+  dir_encode_level: 4
+  include_input: true
+log_dir: outputs/2025-04-22/01-32-53/
+render_test_views: false
