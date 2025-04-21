@@ -72,8 +72,8 @@ class StratifiedSampler(RaySamplerBase):
         num_ray = nears.shape[0]
 
         # Extract scalar near/far for mapping
-        near = nears[0, 0].item()
-        far = fars[0, 0].item()
+        near = nears[0].item()
+        far = fars[0].item()
 
         # Step 1: Create t bins in [0, 1], shape: [num_sample]
         t_bins = self.create_t_bins(num_sample + 1, device=nears.device) # +1 for bin edges
