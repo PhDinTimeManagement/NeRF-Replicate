@@ -63,7 +63,7 @@ class NeRF(nn.Module):
         self.fc_feat = nn.Linear(feat_dim, feat_dim)
 
         # View direction layer after concatentation γ(d) (skip connection)
-        self.fc_view = nn.Linear([feat_dim + view_dir_dim, 128])
+        self.fc_view = nn.Linear(feat_dim + view_dir_dim, 128)
 
         # RGB head (predict color)
         self.fc_rgb = nn.Linear(128, 3)
