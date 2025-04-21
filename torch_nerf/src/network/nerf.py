@@ -35,7 +35,41 @@ class NeRF(nn.Module):
         super().__init__()
 
         # TODO
-        raise NotImplementedError("Task 1")
+
+        self.pos_dim = pos_dim
+        self.view_dir_dim = view_dir_dim
+        self.feat_dim = feat_dim
+
+        # First 4 layers (before skip connection)
+        self.fc_pos = nn.ModuleList([
+            nn.Linear(pos_dim, feat_dim),
+            nn.ReLU(feat_dim, feat_dim),
+            nn.Linear(feat_dim, feat_dim),
+            nn.ReLU(feat_dim, feat_dim),
+        ])
+
+        # Layers after concatentation γ(x) again (skip connection)
+        self.fc_pos_skip = nn.ModuleList([
+            nn.Linear(feat_dim + pos_dim, feat_dim),
+            nn.ReLU(feat_dim, feat_dim),
+            nn.Linear(feat_dim, feat_dim),
+            nn.ReLU(feat_dim, feat_dim),
+        ])
+
+        # Sigma head (predict density)
+        self.fc_sigma = nn.Linear(feat_dim, 1)
+
+        # Feature Layer before color head
+        self.fc_feat = nn.Linear(feat_dim, feat_dim)
+
+        # View direction layer after concatentation γ(d) (skip connection)
+        self.fc_view = nn.ModuleList([feat_dim + view_dir_dim, 128])
+
+        # RGB head (predict color)
+        self.fc_rgb = nn.linear(128, 3)
+
+        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
 
     @jaxtyped
     @typechecked
@@ -60,4 +94,28 @@ class NeRF(nn.Module):
         """
 
         # TODO
-        raise NotImplementedError("Task 1")
+
+        x = pos
+        for i in range(4):
+            x = self.relu(self.fc_pos[i](x))
+
+        # Skip connection: concatenate input pos again
+        x = torch.cat([x, pos], dim=-1)
+
+        for i in range(4):
+            x = self.relu(self.fc_pos_skip[i](x))
+
+        # Sigma (density) prediction
+        sigma = self.relu(self.fc_sigma(x))
+
+        # Feature for RGB head
+        feat = self.fc_feat(x)
+
+        # Concatenate with view direction
+        h = torch.cat([feat, view_dir], dim=-1)
+        h = self.relu(self.fc_view(h))
+
+        # RGB prediction
+        rgb = self.sigmoid(self.fc_rgb(h))
+
+        return sigma, rgb

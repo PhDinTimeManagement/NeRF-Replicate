@@ -1,7 +1,7 @@
 """
 Integrator implementing quadrature rule.
 """
-
+from itertools import accumulate
 from typing import Tuple
 from typeguard import typechecked
 
@@ -43,4 +43,25 @@ class QuadratureIntegrator(IntegratorBase):
         """
         # TODO
         # HINT: Look up the documentation of 'torch.cumsum'.
-        raise NotImplementedError("Task 3")
+
+        # Step 1: Compute alpha_i = 1 - exp(-sigma_i * delta_i)
+        alpha = 1.0 - torch.exp(-sigma * delta) # [num_ray, num_sample]
+
+        # Step 2: Compute cumulative transmittance (T_i = exp(- sum sigma_j * delta_j)) using exclusive cumsum
+        # Cumulative sum of sigma * delta: [num_ray, num_sample]
+        accumulated = torch.cumsum(sigma * delta, dim=-1) # inclusive
+
+        # Shift right and pad with 0 to make it exclusive
+        shifted = torch.roll(accumulated, shifts=1, dims=-1)
+        shifted[:, 0] = 0.0  # no transmittance before first sample
+
+        # T_i = exp(- cumulative)
+        transmittance = torch.exp(-shifted)  # [num_ray, num_sample]
+
+        # Step 3: Compute weights = T_i * alpha_i
+        weights = transmittance * alpha # [num_ray, num_sample]
+
+        # Step 4: Final RGB = sum_i weights_i * color_i
+        rgbs = torch.sum(weights.unsqueeze(-1) * radiance, dim=-2) # [num_ray, 3]
+
+        return rgbs, weights
